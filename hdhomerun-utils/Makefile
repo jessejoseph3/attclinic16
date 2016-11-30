@@ -3,7 +3,7 @@ CXX = g++
 LIBHDHOMERUN = libhdhomerun/libhdhomerun.so
 
 Tuner: Tuner.h Tuner.cpp 
-	$(CXX) $(CXXFLAGS) Tuner.cpp -o Tuner $(LIBHDHOMERUN)
+	$(CXX) $(CXXFLAGS) -c Tuner.cpp $(LIBHDHOMERUN)
 
 clean: 
 	rm Tuner

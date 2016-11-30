@@ -1,2 +1,4 @@
 hdhomerun-utils/Tuner
 bluetooth/bluetooth
+*.so
+*.swp

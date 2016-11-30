@@ -70,7 +70,7 @@ std::vector<size_t> Tuner::getSNQOfAllChannels() const {
 }
 
 
-int main() {
+int test() {
   const std::string deviceID = "1034F75C-0";
   const std::vector<char> channels = {'1', '2', '3', '4'};
   Tuner tuner = Tuner(deviceID, channels);
@@ -91,6 +91,7 @@ int main() {
     std::cout << sigStrengths[i] << '\t';
     std::cout << SNQs[i] << std::endl;
   }
+  return 0;
 }
 
 
