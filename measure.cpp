@@ -1,41 +1,71 @@
 /* \file measure.cpp
  * \brief a script to implement a measurement loop, measuring when commanded to via the bluetooth link
  */
-#include "hdhomerun-utils/Tuner.h"
 #include <pthread.h>
 #include <iostream>
 #include <fstream>
 #include <csignal>
+#include <pthread.h>
+#include "hdhomerun-utils/Tuner.h"
+#include "serialibv1.2/serialib/serialib.h"
 
-std::ofstream serialOut;
-bool continue_measuring = true;
+#define DEVICE_PORT "/dev/ttyO4"
+int Ret;
+serialib LS;                                                            // Object of the serialib class
 
 void signalHandler( int signum ) {
   std::cout << "recieved signal: " << signum << std::endl;
   std::cout << "closing" << std::endl;
-  serialOut.close();
-  continue_measuring = false;
+  LS.Close();
+  Ret = 0;
 }
 
 int main() {
-  std::string deviceID = "1034F75C-0";
+  signal(SIGINT,signalHandler);
+  std::string deviceID = "104689B9-0";
   std::vector<char> channels = {7, 11, 36, 43};
   Tuner tuner = Tuner(deviceID, channels);
-  serialOut.open("/dev/ttyO4");
-  signal(SIGINT, signalHandler);
+
+  std::string dataLine;
 
 
-  while(continue_measuring) {
-    sleep(1);
+  // Open serial port
+
+  Ret=LS.Open(DEVICE_PORT,9600);                                        // Open serial link at 115200 bauds
+  if (Ret!=1) {                                                           // If an error occured...
+      std::cout << "Error while opening port. Permission problem?" << std::endl;
+      return Ret;                                                         // ... quit the application
+  }
+  std::cout << "Serial port opened successfully !\n" << std::endl;
+
+
+
+
+  // Write the AT command on the serial port
+
+
+  while(Ret==1) {
+    sleep(3);
     tuner.updateStatusOfAllChannels();
+    Ret=LS.WriteString("ch  ss  snq\n");
     for(size_t i = 0; i < channels.size(); ++i) {
-      /* replace these couts with whatever we use to write to
-      the tty line.
-      */
-      serialOut << channels[i] << '\t';
-      serialOut << tuner.getSignalStrengthOfChannel(i) << '\t';
-      serialOut << tuner.getSNQOfChannel(i) << '\n';
+      dataLine = std::to_string(channels[i]);
+      dataLine += "  ";
+      if(channels[i] == 7){
+	dataLine += ' ';
+      }
+      dataLine += std::to_string(tuner.getSignalStrengthOfChannel(i));
+      dataLine += "   "; 
+      dataLine += std::to_string(tuner.getSNQOfChannel(i));
+      dataLine += '\n';
+      Ret = LS.WriteString(dataLine.data());
+      std::cout << dataLine.data(); 
+      if(Ret != 1) {
+	break;
+      }
     } 
+    std::cout << std::endl << std::endl;
+    Ret = LS.WriteString("\n\n");
   }
   return 0;
 }

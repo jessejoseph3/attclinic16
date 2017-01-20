@@ -23,7 +23,7 @@
 #endif
 
 #ifdef __linux__
-#define         DEVICE_PORT             "/dev/ttyS0"                         // ttyS0 for linux
+#define         DEVICE_PORT             "/dev/ttyO4"                         // ttyS0 for linux
 #endif
 
 
@@ -38,7 +38,7 @@ int main()
 
     // Open serial port
 
-    Ret=LS.Open(DEVICE_PORT,115200);                                        // Open serial link at 115200 bauds
+    Ret=LS.Open(DEVICE_PORT,9600);                                        // Open serial link at 115200 bauds
     if (Ret!=1) {                                                           // If an error occured...
         printf ("Error while opening port. Permission problem ?\n");        // ... display a message ...
         return Ret;                                                         // ... quit the application

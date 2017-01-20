@@ -25,7 +25,6 @@ void Tuner::setChannelsList(const std::vector<char>& channels) {
   for(size_t i = 0; i < channels.size(); ++i) {
     channels_[i] = channels[i];
     status_.push_back(new hdhomerun_tuner_status_t);
-    status_[i]->channel[0] = channels_[i];
   }
 }
 
@@ -34,6 +33,8 @@ std::vector<char> Tuner::getChannelsList() const {
 }
 
 void Tuner::updateStatusOfChannel(const size_t channelIndex) {
+  std::string channel = std::to_string(channels_[channelIndex]);
+  hdhomerun_device_set_tuner_channel(device_, channel.data());
   hdhomerun_device_get_tuner_status(device_,NULL,
       status_[channelIndex]);
 }
@@ -44,12 +45,13 @@ void Tuner::updateStatusOfAllChannels() {
   }
 }
 
-size_t Tuner::getSignalStrengthOfChannel(const size_t channelIndex)
-  const {
-  return status_[channelIndex]->signal_strength;
+size_t Tuner::getSignalStrengthOfChannel(const size_t channelIndex) {
+  updateStatusOfChannel(channelIndex);
+  return status_[channelIndex]->signal_strength; 
 }
 
-std::vector<size_t> Tuner::getSignalStrengthOfAllChannels() const {
+std::vector<size_t> Tuner::getSignalStrengthOfAllChannels() {
+  updateStatusOfAllChannels();
   std::vector<size_t> signalStrengths;
   for(auto status_p : status_) {
     signalStrengths.push_back(status_p->signal_strength);
@@ -57,11 +59,13 @@ std::vector<size_t> Tuner::getSignalStrengthOfAllChannels() const {
   return signalStrengths;
 }
 
-size_t Tuner::getSNQOfChannel(const size_t channelIndex) const {
+size_t Tuner::getSNQOfChannel(const size_t channelIndex) {
+  updateStatusOfChannel(channelIndex);
   return status_[channelIndex]->signal_to_noise_quality;
 }
 
-std::vector<size_t> Tuner::getSNQOfAllChannels() const {
+std::vector<size_t> Tuner::getSNQOfAllChannels() {
+  updateStatusOfAllChannels();
   std::vector<size_t> SNQs; 
   for(auto status_p : status_) {
     SNQs.push_back(status_p->signal_to_noise_quality);
@@ -70,14 +74,14 @@ std::vector<size_t> Tuner::getSNQOfAllChannels() const {
 }
 
 
-int test() {
+int testfn() {
   const std::string deviceID = "1034F75C-0";
-  const std::vector<char> channels = {'1', '2', '3', '4'};
+  const std::vector<char> channels = {7, 11, 36, 43};
   Tuner tuner = Tuner(deviceID, channels);
   tuner.updateStatusOfAllChannels();
   std::cout << "individual channel tests" << std::endl;
   for(size_t i = 0; i < channels.size(); ++i) {
-    std::cout << channels[i] << '\t';
+    std::cout << std::to_string(channels[i]) << '\t';
     std::cout << tuner.getSignalStrengthOfChannel(i) << '\t';
     std::cout << tuner.getSNQOfChannel(i) << std::endl;
   }
@@ -87,7 +91,7 @@ int test() {
   std::vector<size_t> SNQs = tuner.getSNQOfAllChannels(); 
   std::cout << std::endl << "all channels test" << std::endl;
   for(size_t i = 0; i < channelsList.size(); ++i) {
-    std::cout << channelsList[i] << '\t';
+    std::cout << std::to_string(channelsList[i]) << '\t';
     std::cout << sigStrengths[i] << '\t';
     std::cout << SNQs[i] << std::endl;
   }

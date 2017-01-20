@@ -66,23 +66,23 @@ class Tuner {
     * \brief get signal strength of given channel 
     * \param channelIndex, the index of the chennal in channel list 
     */
-    size_t getSignalStrengthOfChannel(const size_t channelIndex) const;
+    size_t getSignalStrengthOfChannel(const size_t channelIndex) ;
 
     /**
     * \brief get signal strength of all channels
     */
-    std::vector<size_t> getSignalStrengthOfAllChannels() const;
+    std::vector<size_t> getSignalStrengthOfAllChannels();
 
     /**
     * \brief get signal to noise quality of given channel 
     * \param channelIndex, the index of the channel in channel list
     */
-    size_t getSNQOfChannel(const size_t channelIndex) const;
+    size_t getSNQOfChannel(const size_t channelIndex);
 
     /**
     * \brief get signal to noise quality of all channels
     */
-    std::vector<size_t> getSNQOfAllChannels() const;
+    std::vector<size_t> getSNQOfAllChannels();
 
   private:
     std::string deviceID_;
